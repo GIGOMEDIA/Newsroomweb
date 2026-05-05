@@ -1,6 +1,6 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
+import { Platform } from 'react-native';
 import { QueryClient } from '@tanstack/react-query';
+import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister';
 
 const ONE_MINUTE = 60 * 1000;
 const ONE_HOUR = 60 * ONE_MINUTE;
@@ -23,18 +23,30 @@ export const queryClient = new QueryClient({
   },
 });
 
-export const queryPersister = createAsyncStoragePersister({
-  key: 'crednews:tanstack-query-cache',
-  storage: AsyncStorage,
-  throttleTime: 1000,
-});
+// ✅ Only create persister on native (NOT web / SSR)
+let queryPersister: any = undefined;
 
-export const queryPersistOptions = {
-  buster: 'v1',
-  maxAge: ONE_DAY * 7,
-  persister: queryPersister,
-};
+if (Platform.OS !== 'web') {
+  const AsyncStorage =
+    require('@react-native-async-storage/async-storage').default;
 
+  queryPersister = createAsyncStoragePersister({
+    key: 'crednews:tanstack-query-cache',
+    storage: AsyncStorage,
+    throttleTime: 1000,
+  });
+}
+
+// ✅ Export safely
+export const queryPersistOptions = queryPersister
+  ? {
+      buster: 'v1',
+      maxAge: ONE_DAY * 7,
+      persister: queryPersister,
+    }
+  : undefined;
+
+// (unchanged)
 export const queryKeys = {
   ai: {
     brief: (articleId: string) => ['ai', 'brief', articleId] as const,
