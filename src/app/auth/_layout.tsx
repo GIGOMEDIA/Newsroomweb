@@ -1,17 +1,31 @@
-import { Stack } from 'expo-router';
+import { Stack } from "expo-router";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-export default function AuthLayout() {
+import { AppContextMenuProvider } from "@/components/platform/AppContextMenu";
+
+const queryClient = new QueryClient();
+
+export default function RootLayout() {
   return (
-    <Stack
-      screenOptions={{
-        animation: 'slide_from_right',
-        animationDuration: 220,
-        contentStyle: { backgroundColor: '#07090B' },
-        headerShown: false,
-      }}
-    >
-      <Stack.Screen name="signin" />
-      <Stack.Screen name="signup" />
-    </Stack>
+    <QueryClientProvider client={queryClient}>
+      <AppContextMenuProvider>
+        <SafeAreaProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: "#07090B" },
+            }}
+          />
+
+          <StatusBar
+            backgroundColor="#07090B"
+            style="light"
+            translucent={false}
+          />
+        </SafeAreaProvider>
+      </AppContextMenuProvider>
+    </QueryClientProvider>
   );
 }
