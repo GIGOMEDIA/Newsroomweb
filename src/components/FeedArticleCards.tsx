@@ -11,6 +11,11 @@ import {
   View,
 } from 'react-native';
 
+import {
+  copyText,
+  getContextPoint,
+  useAppContextMenu,
+} from '@/components/platform/AppContextMenu';
 import { useAdaptiveLayout } from '@/hooks/platform/useAdaptiveLayout';
 import { Article } from '@/types/article';
 import { openArticle } from '@/utils/articleNavigation';
@@ -18,18 +23,8 @@ import { formatStoryDate } from '@/utils/date';
 import { fontFamily } from '@/utils/typography';
 
 import { BookmarkButton } from './BookmarkButton';
-import { StoryMeta } from './StoryMeta';
 
 type BookmarkHandler = (article: Article, event: GestureResponderEvent) => void;
-
-/**
- * 🚨 FIX: Dummy context menu (prevents crash)
- */
-const useAppContextMenu = () => ({
-  showMenu: () => {},
-});
-const copyText = async () => {};
-const getContextPoint = () => ({ x: 0, y: 0 });
 
 function useEntranceAnimation(index: number) {
   const opacity = useRef(new Animated.Value(0)).current;
@@ -70,12 +65,30 @@ export function LeadArticleCard({
 
   const contextProps =
     Platform.OS === 'web'
-      ? {
+      ? ({
           onContextMenu: (event: any) => {
             event.preventDefault?.();
-            showMenu({});
+            const point = getContextPoint(event);
+            showMenu({
+              ...point,
+              items: [
+                { label: 'Open article', onPress: () => openArticle(article) },
+                {
+                  label: isBookmarked ? 'Remove from saved' : 'Save article',
+                  onPress: () =>
+                    onToggleBookmark(article, {
+                      stopPropagation: () => {},
+                    } as GestureResponderEvent),
+                },
+                {
+                  disabled: !article.url,
+                  label: 'Copy source link',
+                  onPress: () => void copyText(article.url),
+                },
+              ],
+            });
           },
-        }
+        } as Record<string, unknown>)
       : {};
 
   return (
@@ -86,14 +99,29 @@ export function LeadArticleCard({
         onPress={() => openArticle(article)}
       >
         <Image source={{ uri: article.imageUrl }} style={styles.leadImage} />
+
+        <LinearGradient
+          colors={['transparent', 'rgba(0,0,0,0.7)']}
+          style={StyleSheet.absoluteFill}
+        />
+
         <View style={styles.leadContent}>
-          <Text style={styles.leadTitle}>{article.title}</Text>
-          <StoryMeta
-            publishedAt={article.publishedAt}
-            source={article.source.name}
-            variant="lead"
-          />
+          <Text style={styles.leadTitle} numberOfLines={3}>
+            {article.title}
+          </Text>
+
+          {/* ✅ REPLACED StoryMeta */}
+          <Text style={styles.meta}>
+            {article.source?.name} • {formatStoryDate(article.publishedAt)}
+          </Text>
         </View>
+
+        <BookmarkButton
+          isBookmarked={isBookmarked}
+          size={22}
+          style={styles.bookmark}
+          onPress={(e) => onToggleBookmark(article, e)}
+        />
       </Pressable>
     </Animated.View>
   );
@@ -115,35 +143,45 @@ export function FeedArticleCard({
 
   const contextProps =
     Platform.OS === 'web'
-      ? {
+      ? ({
           onContextMenu: (event: any) => {
             event.preventDefault?.();
-            showMenu({});
+            const point = getContextPoint(event);
+            showMenu({
+              ...point,
+              items: [
+                { label: 'Open article', onPress: () => openArticle(article) },
+                {
+                  label: isBookmarked ? 'Remove from saved' : 'Save article',
+                  onPress: () =>
+                    onToggleBookmark(article, {
+                      stopPropagation: () => {},
+                    } as GestureResponderEvent),
+                },
+              ],
+            });
           },
-        }
+        } as Record<string, unknown>)
       : {};
 
   return (
-    <Animated.View
-      style={[styles.gridCell, { opacity, transform: [{ translateY }] }]}
-    >
+    <Animated.View style={{ opacity, transform: [{ translateY }] }}>
       <Pressable
         {...contextProps}
-        style={styles.articleCard}
+        style={styles.card}
         onPress={() => openArticle(article)}
       >
-        <Image
-          source={{ uri: article.imageUrl }}
-          style={styles.articleImage}
-        />
+        <Image source={{ uri: article.imageUrl }} style={styles.image} />
 
-        <View style={styles.cardBody}>
-          <StoryMeta
-            publishedAt={article.publishedAt}
-            source={article.source.name}
-            variant="compact"
-          />
-          <Text style={styles.articleTitle}>{article.title}</Text>
+        <View style={styles.body}>
+          <Text style={styles.title} numberOfLines={3}>
+            {article.title}
+          </Text>
+
+          {/* ✅ REPLACED StoryMeta */}
+          <Text style={styles.meta}>
+            {article.source?.name}
+          </Text>
         </View>
       </Pressable>
     </Animated.View>
@@ -151,36 +189,14 @@ export function FeedArticleCard({
 }
 
 const styles = StyleSheet.create({
-  articleCard: {
-    backgroundColor: '#0B0D10',
-    borderColor: '#191B20',
-    borderWidth: 1,
-    flex: 1,
-  },
-  articleImage: {
-    backgroundColor: '#17191D',
-    height: 100,
-    width: '100%',
-  },
-  articleTitle: {
-    color: '#F0F0F2',
-    fontFamily: fontFamily.bold,
-    fontSize: 12,
-    marginTop: 5,
-  },
-  cardBody: {
-    padding: 8,
-  },
-  gridCell: {
-    flex: 1,
-    padding: 5,
-  },
   leadCard: {
-    backgroundColor: '#111318',
-    borderColor: '#1D2026',
-    borderWidth: 1,
     height: 220,
     marginBottom: 12,
+    backgroundColor: '#111',
+  },
+  leadImage: {
+    width: '100%',
+    height: '100%',
   },
   leadContent: {
     position: 'absolute',
@@ -188,13 +204,35 @@ const styles = StyleSheet.create({
     left: 10,
     right: 10,
   },
-  leadImage: {
-    height: '100%',
-    width: '100%',
-  },
   leadTitle: {
-    color: '#FFFFFF',
-    fontFamily: fontFamily.bold,
+    color: '#fff',
     fontSize: 16,
+    fontFamily: fontFamily.bold,
+  },
+  meta: {
+    color: '#aaa',
+    fontSize: 10,
+    marginTop: 4,
+  },
+  bookmark: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+  },
+  card: {
+    backgroundColor: '#0B0D10',
+    marginBottom: 10,
+  },
+  image: {
+    width: '100%',
+    height: 100,
+  },
+  body: {
+    padding: 8,
+  },
+  title: {
+    color: '#fff',
+    fontSize: 12,
+    fontFamily: fontFamily.bold,
   },
 });
