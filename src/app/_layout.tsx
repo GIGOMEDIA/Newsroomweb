@@ -19,23 +19,11 @@ import { useKeyboardShortcuts } from '@/hooks/platform/useKeyboardShortcuts';
 import { queryClient, queryPersistOptions } from '@/services/queryClient';
 import { configureGlobalFonts, interFonts } from '@/utils/typography';
 
-if (Platform.OS !== 'web' || typeof window !== 'undefined') {
-  onlineManager.setEventListener((setOnline) => {
-    const subscription = Network.addNetworkStateListener((state) => {
-      setOnline(Boolean(state.isConnected) && state.isInternetReachable !== false);
-    });
-
-    return () => subscription.remove();
-  });
-}
-
 function handleAppStateChange(status: AppStateStatus) {
   if (Platform.OS !== 'web') {
     focusManager.setFocused(status === 'active');
   }
 }
-
-void SplashScreen.preventAutoHideAsync();
 
 function GlobalShortcutLayer() {
   useKeyboardShortcuts();
@@ -46,18 +34,44 @@ export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts(interFonts);
   const [splashFinished, setSplashFinished] = useState(false);
 
+  // ✅ Prevent splash auto-hide (safe inside useEffect)
   useEffect(() => {
-    if (fontsLoaded || fontError) {
-      configureGlobalFonts();
-      void SplashScreen.hideAsync();
-    }
-  }, [fontError, fontsLoaded]);
+    SplashScreen.preventAutoHideAsync();
+  }, []);
 
+  // ✅ Handle network state (moved from top-level)
   useEffect(() => {
-    const subscription = AppState.addEventListener('change', handleAppStateChange);
+    if (Platform.OS === 'web') return;
+
+    onlineManager.setEventListener((setOnline) => {
+      const subscription = Network.addNetworkStateListener((state) => {
+        setOnline(
+          Boolean(state.isConnected) &&
+          state.isInternetReachable !== false
+        );
+      });
+
+      return () => subscription.remove();
+    });
+  }, []);
+
+  // ✅ Handle app focus state
+  useEffect(() => {
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange
+    );
 
     return () => subscription.remove();
   }, []);
+
+  // ✅ Fonts + splash handling
+  useEffect(() => {
+    if (fontsLoaded || fontError) {
+      configureGlobalFonts();
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, fontError]);
 
   const handleSplashFinish = useCallback(() => {
     setSplashFinished(true);
@@ -77,6 +91,7 @@ export default function RootLayout() {
           <AuthProvider config={firebaseConfig}>
             <AppContextMenuProvider>
               <GlobalShortcutLayer />
+
               <Stack>
                 <Stack.Screen
                   name="(tabs)"
@@ -86,6 +101,7 @@ export default function RootLayout() {
                     headerShown: false,
                   }}
                 />
+
                 <Stack.Screen
                   name="article/[id]"
                   options={{
@@ -96,6 +112,7 @@ export default function RootLayout() {
                     headerShown: false,
                   }}
                 />
+
                 <Stack.Screen
                   name="interests"
                   options={{
@@ -106,6 +123,7 @@ export default function RootLayout() {
                     presentation: 'modal',
                   }}
                 />
+
                 <Stack.Screen
                   name="auth"
                   options={{
@@ -117,11 +135,13 @@ export default function RootLayout() {
                   }}
                 />
               </Stack>
+
               <StatusBar
                 backgroundColor="#07090B"
                 style="light"
                 translucent={false}
               />
+
               {!splashFinished ? (
                 <AnimatedSplash onFinish={handleSplashFinish} />
               ) : null}
