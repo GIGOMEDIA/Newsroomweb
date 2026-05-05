@@ -1,0 +1,35 @@
+appId: com.crednews.desktop
+productName: CredNews
+directories:
+  output: desktop-build
+files:
+  - "!**/*"
+  - desktop/**/*
+  - dist/**/*
+  - build/icon.png
+  - package.json
+extraMetadata:
+  main: desktop/main.cjs
+asar: true
+compression: maximum
+win:
+  signAndEditExecutable: false
+  icon: build/icon.png
+  target:
+    - target: nsis
+      arch: x64
+    - target: portable
+      arch: x64
+    - target: zip
+      arch: x64
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: NEWSROOM
+  artifactName: ${productName}-${version}-Setup.${ext}
+portable:
+  artifactName: ${productName}-${version}-portable.${ext}
+  unicode: true

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "pnpm build:web",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "outputDirectory": "dist",
+  "framework": null,
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/proxy/gnews/:path*", "destination": "https://gnews.io/api/v4/:path*" },
+    { "source": "/proxy/predicthq/:path*", "destination": "https://api.predicthq.com/v1/:path*" },
+    { "source": "/proxy/groq/:path*", "destination": "https://api.groq.com/openai/v1/:path*" },
+    { "source": "/proxy/cerebras/:path*", "destination": "https://api.cerebras.ai/v1/:path*" },
+    { "source": "/proxy/openrouter/:path*", "destination": "https://openrouter.ai/api/v1/:path*" },
+    { "source": "/proxy/gemini/:path*", "destination": "https://generativelanguage.googleapis.com/v1beta/:path*" },
+    { "source": "/article/:id", "destination": "/article/[id]" },
+    { "source": "/article/:id/", "destination": "/article/[id]" }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "expo": {
+    "name": "NEWSROOM",
+    "slug": "NEWSROOM",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./src/assets/images/logo.png",
+    "scheme": "newsroom",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "NEWSROOM uses your location to find nearby tech events.",
+        "NSPhotoLibraryUsageDescription": "NEWSROOM needs access to your photos so you can attach images as supporting evidence.",
+        "NSPhotoLibraryAddUsageDescription": "NEWSROOM saves images you submit as evidence.",
+        "NSCameraUsageDescription": "NEWSROOM uses the camera so you can capture supporting evidence."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./src/assets/images/logo.png",
+        "backgroundImage": "./src/assets/images/logo.png",
+        "monochromeImage": "./src/assets/images/logo.png"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "READ_MEDIA_IMAGES"
+      ],
+      "package": "com.acuop.NEWSROOM"
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./build/icon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./src/assets/images/logo.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff",
+          "dark": {
+            "backgroundColor": "#000000"
+          }
+        }
+      ],
+      "@react-native-google-signin/google-signin"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1c9de1a3-eca4-493e-abdd-7b81cf78f4e5"
+      }
+    }
+  }
+}
