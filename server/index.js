@@ -7,7 +7,7 @@ app.use(cors());
 
 app.get("/gnews", async (req, res) => {
   try {
-    const url = `https://gnews.io/api/v4/top-headlines?token=${process.env.GNEWS_API_KEY}&lang=en&country=ng`;
+    const url = `https://gnews.io/api/v4/top-headlines?country=ng&lang=en&token=${process.env.GNEWS_API_KEY}`;
 
     const response = await fetch(url);
     const data = await response.json();
@@ -18,5 +18,5 @@ app.get("/gnews", async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`Server running on ${PORT}`));
