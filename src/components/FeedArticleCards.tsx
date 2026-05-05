@@ -36,13 +36,13 @@ function useEntranceAnimation(index: number) {
         delay: index * 55,
         duration: 300,
         toValue: 1,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web', // ✅ FIX
       }),
       Animated.timing(translateY, {
         delay: index * 55,
         duration: 300,
         toValue: 0,
-        useNativeDriver: true,
+        useNativeDriver: Platform.OS !== 'web', // ✅ FIX
       }),
     ]).start();
   }, [index]);
@@ -61,7 +61,6 @@ export function LeadArticleCard({
 }) {
   const { opacity, translateY } = useEntranceAnimation(0);
   const { showMenu } = useAppContextMenu();
-  const layout = useAdaptiveLayout();
 
   const contextProps =
     Platform.OS === 'web'
@@ -110,7 +109,7 @@ export function LeadArticleCard({
             {article.title}
           </Text>
 
-          {/* ✅ REPLACED StoryMeta */}
+          {/* ✅ FIX: removed StoryMeta */}
           <Text style={styles.meta}>
             {article.source?.name} • {formatStoryDate(article.publishedAt)}
           </Text>
@@ -178,7 +177,7 @@ export function FeedArticleCard({
             {article.title}
           </Text>
 
-          {/* ✅ REPLACED StoryMeta */}
+          {/* ✅ FIX: removed StoryMeta */}
           <Text style={styles.meta}>
             {article.source?.name}
           </Text>
