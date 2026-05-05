@@ -1,44 +1,35 @@
-import { focusManager, onlineManager, QueryClientProvider } from '@tanstack/react-query';
 import {
-  PersistQueryClientProvider,
-} from '@tanstack/react-query-persist-client';
+  focusManager,
+  onlineManager,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 
-import { useFonts } from 'expo-font';
-import * as SplashScreen from 'expo-splash-screen';
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
 
-import {
-  useCallback,
-  useEffect,
-  useState,
-} from 'react';
-import {
-  AppState,
-  type AppStateStatus,
-  Platform,
-} from 'react-native';
+import { useCallback, useEffect, useState } from "react";
+import { AppState, type AppStateStatus } from "react-native";
 
-import { KeyboardProvider } from 'react-native-keyboard-controller';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { AuthProvider } from 'rn-swiftauth-sdk';
+import { KeyboardProvider } from "react-native-keyboard-controller";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { AuthProvider } from "rn-swiftauth-sdk";
 
-import 'react-native-reanimated';
+import "react-native-reanimated";
 
-import { AnimatedSplash } from '@/components/AnimatedSplash';
-import { AppContextMenuProvider } from '@/components/platform/AppContextMenu';
-import { firebaseConfig } from '@/config/firebase';
-import { useKeyboardShortcuts } from '@/hooks/platform/useKeyboardShortcuts';
+import { AnimatedSplash } from "@/components/AnimatedSplash";
+import { AppContextMenuProvider } from "@/components/platform/AppContextMenu";
+import { firebaseConfig } from "@/config/firebase";
+import { useKeyboardShortcuts } from "@/hooks/platform/useKeyboardShortcuts";
 
-import {
-  queryClient,
-  queryPersistOptions,
-} from '@/services/queryClient';
+import { queryClient, queryPersistOptions } from "@/services/queryClient";
 
-import { configureGlobalFonts, interFonts } from '@/utils/typography';
+import { configureGlobalFonts, interFonts } from "@/utils/typography";
 
 function handleAppStateChange(status: AppStateStatus) {
-  focusManager.setFocused(status === 'active');
+  focusManager.setFocused(status === "active");
 }
 
 function GlobalShortcutLayer() {
@@ -58,13 +49,12 @@ export default function RootLayout() {
   // Network (native only)
   useEffect(() => {
     const setupNetwork = async () => {
-      const Network = await import('expo-network');
+      const Network = await import("expo-network");
 
       onlineManager.setEventListener((setOnline) => {
         const subscription = Network.addNetworkStateListener((state) => {
           setOnline(
-            Boolean(state.isConnected) &&
-              state.isInternetReachable !== false
+            Boolean(state.isConnected) && state.isInternetReachable !== false,
           );
         });
 
@@ -78,8 +68,8 @@ export default function RootLayout() {
   // App focus
   useEffect(() => {
     const subscription = AppState.addEventListener(
-      'change',
-      handleAppStateChange
+      "change",
+      handleAppStateChange,
     );
 
     return () => subscription.remove();
@@ -123,8 +113,8 @@ export default function RootLayout() {
                 <Stack.Screen
                   name="(tabs)"
                   options={{
-                    animation: 'fade',
-                    contentStyle: { backgroundColor: '#07090B' },
+                    animation: "fade",
+                    contentStyle: { backgroundColor: "#07090B" },
                     headerShown: false,
                   }}
                 />
@@ -132,9 +122,9 @@ export default function RootLayout() {
                 <Stack.Screen
                   name="article/[id]"
                   options={{
-                    animation: 'slide_from_right',
+                    animation: "slide_from_right",
                     animationDuration: 260,
-                    contentStyle: { backgroundColor: '#07090B' },
+                    contentStyle: { backgroundColor: "#07090B" },
                     gestureEnabled: true,
                     headerShown: false,
                   }}
@@ -143,22 +133,22 @@ export default function RootLayout() {
                 <Stack.Screen
                   name="interests"
                   options={{
-                    animation: 'slide_from_bottom',
+                    animation: "slide_from_bottom",
                     animationDuration: 260,
-                    contentStyle: { backgroundColor: '#07090B' },
+                    contentStyle: { backgroundColor: "#07090B" },
                     headerShown: false,
-                    presentation: 'modal',
+                    presentation: "modal",
                   }}
                 />
 
                 <Stack.Screen
                   name="auth"
                   options={{
-                    animation: 'slide_from_bottom',
+                    animation: "slide_from_bottom",
                     animationDuration: 260,
-                    contentStyle: { backgroundColor: '#07090B' },
+                    contentStyle: { backgroundColor: "#07090B" },
                     headerShown: false,
-                    presentation: 'modal',
+                    presentation: "modal",
                   }}
                 />
               </Stack>

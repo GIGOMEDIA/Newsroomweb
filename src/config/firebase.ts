@@ -1,7 +1,12 @@
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { getApps, initializeApp } from 'firebase/app';
-// @ts-expect-error - getReactNativePersistence is exported at runtime in firebase v12 but missing from the bundled types in some builds.
-import { getReactNativePersistence, initializeAuth } from 'firebase/auth';
+import {
+  initializeAuth,
+  getReactNativePersistence,
+  getAuth,
+} from 'firebase/auth';
 
 import { env } from '@/utils/env';
 
@@ -12,7 +17,6 @@ export const firebaseConfig = {
   messagingSenderId: env.firebaseMessagingSenderId,
   projectId: env.firebaseProjectId,
   storageBucket: env.firebaseStorageBucket,
-  persistence: 'local' as const,
 };
 
 export const isFirebaseConfigured =
@@ -20,16 +24,25 @@ export const isFirebaseConfigured =
   Boolean(env.firebaseAppId) &&
   Boolean(env.firebaseProjectId);
 
-// Pre-initialize Firebase Auth with AsyncStorage persistence so the
-// rn-swiftauth-sdk's AuthProvider attaches to the same instance and sessions
-// survive app restarts. Must run before AuthProvider mounts.
+// Initialize Firebase safely across platforms
+let app;
+
 if (isFirebaseConfigured) {
-  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+  app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+
   try {
-    initializeAuth(app, {
-      persistence: getReactNativePersistence(AsyncStorage),
-    });
+    if (Platform.OS === 'web') {
+      // ✅ Web: Firebase handles persistence automatically (localStorage / indexedDB)
+      getAuth(app);
+    } else {
+      // ✅ React Native: use AsyncStorage persistence
+      initializeAuth(app, {
+        persistence: getReactNativePersistence(AsyncStorage),
+      });
+    }
   } catch {
-    // Already initialized (hot reload). Ignore.
+    // Ignore "already initialized" errors (common in hot reload)
   }
 }
+
+export { app };
