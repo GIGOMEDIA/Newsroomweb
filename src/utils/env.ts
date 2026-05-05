@@ -44,12 +44,10 @@ export const buildApiUrl = (basePath: string, endpoint: string): URL => {
 
 export const env = {
   apiBaseUrl: withProxy(
-    '/proxy/gnews',
-    required(
-      process.env.EXPO_PUBLIC_NEWS_API_BASE_URL,
-      'EXPO_PUBLIC_NEWS_API_BASE_URL',
-    ),
-  ),
+  '/proxy/gnews',
+  required(process.env.EXPO_PUBLIC_NEWS_API_BASE_URL, ...)
+),
+  
   apiKey: process.env.EXPO_PUBLIC_NEWS_API_KEY ?? '',
 
   eventsApiBaseUrl: withProxy(
