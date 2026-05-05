@@ -1,4 +1,4 @@
-import { focusManager, onlineManager } from '@tanstack/react-query';
+import { focusManager, onlineManager, QueryClientProvider } from '@tanstack/react-query';
 import {
   PersistQueryClientProvider,
 } from '@tanstack/react-query-persist-client';
@@ -101,11 +101,18 @@ export default function RootLayout() {
     return null;
   }
 
+  const QueryProvider = queryPersistOptions
+    ? (props: any) => (
+        <PersistQueryClientProvider
+          client={queryClient}
+          persistOptions={queryPersistOptions}
+          {...props}
+        />
+      )
+    : (props: any) => <QueryClientProvider client={queryClient} {...props} />;
+
   return (
-    <PersistQueryClientProvider
-      client={queryClient}
-      persistOptions={queryPersistOptions}
-    >
+    <QueryProvider>
       <SafeAreaProvider>
         <KeyboardProvider>
           <AuthProvider config={firebaseConfig}>
@@ -169,6 +176,6 @@ export default function RootLayout() {
           </AuthProvider>
         </KeyboardProvider>
       </SafeAreaProvider>
-    </PersistQueryClientProvider>
+    </QueryProvider>
   );
 }
