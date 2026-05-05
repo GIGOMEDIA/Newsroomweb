@@ -11,7 +11,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 
 import { useCallback, useEffect, useState } from "react";
-import { AppState, type AppStateStatus } from "react-native";
+import { AppState, Platform, type AppStateStatus } from "react-native";
 
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -46,9 +46,11 @@ export default function RootLayout() {
     SplashScreen.preventAutoHideAsync();
   }, []);
 
-  // Network (native only)
+  // ✅ FIXED: Network (skip on web)
   useEffect(() => {
     const setupNetwork = async () => {
+      if (Platform.OS === "web") return;
+
       const Network = await import("expo-network");
 
       onlineManager.setEventListener((setOnline) => {
@@ -99,7 +101,9 @@ export default function RootLayout() {
           {...props}
         />
       )
-    : (props: any) => <QueryClientProvider client={queryClient} {...props} />;
+    : (props: any) => (
+        <QueryClientProvider client={queryClient} {...props} />
+      );
 
   return (
     <QueryProvider>
